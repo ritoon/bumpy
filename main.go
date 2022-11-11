@@ -1,10 +1,8 @@
 package main
 
 import (
-	"io/fs"
 	"log"
-	"os"
-	"strings"
+	"os/exec"
 )
 
 func main() {
@@ -12,23 +10,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	for k := range files {
 		log.Println(files[k].Name())
 	}
+
+	err = execShell("test.sh", "hello")
+	if err != nil {
+		log.Println(err)
+	}
 }
 
-func getEnvFiles() ([]fs.DirEntry, error) {
-	files, err := os.ReadDir("./")
+func execShell(filename, command string) error {
+	cmd := exec.Command("./"+filename, command)
+	res, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	res := make([]fs.DirEntry, 0)
-
-	for k := range files {
-		if strings.Contains(files[k].Name(), ".env") {
-			res = append(res, files[k])
-		}
-	}
-	return res, nil
+	log.Println(string(res))
+	return nil
 }
